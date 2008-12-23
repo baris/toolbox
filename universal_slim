@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# A dummy script to make universal libraries slimmer, thinner, better :)
+# Baris Metin <baris _at_ metin.org>
+
 import sys
 import os
 import time
@@ -18,9 +21,6 @@ def run(cmd):
                          close_fds=True)
     p.wait()
     return p.returncode, p.stdout.readlines()
-
-def B_to_M(B):
-    return B / 1024.0 / 1024.0
 
 def get_all_applications_dirs():
     return [x.strip() for x in os.popen('mdfind "kMDItemContentTypeTree == \\\"com.apple.application\\\""').readlines()]
@@ -65,7 +65,7 @@ def report(all):
             if arch != MACHINE_ARCH:
                 space_saved += size
     if space_saved:
-        print "Found %.2f M junk!" % B_to_M(space_saved)
+        print "Found %.2f M junk!" % space_saved / 1024.0 / 1024.0
     else:
         print "Looks clean..."
 

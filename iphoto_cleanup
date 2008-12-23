@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# Replaces the original files in iPhoto Library with modified ones to
+# gain some space.
+# Baris Metin <baris _at_ metin.org>
+
 import os
 import sys
 import shutil
