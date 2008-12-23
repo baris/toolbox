@@ -1,0 +1,108 @@
+#!/usr/bin/env python
+
+import sys
+import os
+import time
+import tempfile
+import subprocess
+import platform
+import optparse
+import stat
+
+MACHINE_ARCH = platform.machine()
+
+def run(cmd):
+    p = subprocess.Popen(cmd, shell=True,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.PIPE,
+                         close_fds=True)
+    p.wait()
+    return p.returncode, p.stdout.readlines()
+
+def B_to_M(B):
+    return B / 1024.0 / 1024.0
+
+def get_all_applications_dirs():
+    return [x.strip() for x in os.popen('mdfind "kMDItemContentTypeTree == \\\"com.apple.application\\\""').readlines()]
+
+def get_size_info(binary):
+    architectures = {}
+    cur_arch = ""
+    ret, lines = run("lipo -detailed_info %s" % binary)
+    assert(ret == 0)
+    for line in lines:
+        line = line.strip()
+        if line.startswith("architecture"):
+            cur_arch = line.split()[1]
+        elif line.startswith("size"):
+            architectures[cur_arch] = int(line.split()[1])
+    return architectures
+
+def check_universal_file(f):
+    if run("file " + f)[1][0].find("Mach-O universal") >= 0:
+        try:
+            archs = get_size_info(f)
+            return {f: archs}
+            if len(archs.keys()) > 1:
+                return {f: archs}
+        except AssertionError:
+            pass
+    return None
+
+def walk_directory(d):
+    all = {}
+    for root,dirs,files in os.walk(d):
+        for f in files:
+            info = check_universal_file(os.path.join(root,f))
+            if info:
+                all.update(info)
+    return all
+
+def report(all):
+    space_saved = 0
+    for k in all.iterkeys():
+        for arch,size in all[k].items():
+            if arch != MACHINE_ARCH:
+                space_saved += size
+    if space_saved:
+        print "Found %.2f M junk!" % B_to_M(space_saved)
+    else:
+        print "Looks clean..."
+
+def thin(all):
+    for k in all.iterkeys():
+        mode = os.stat(k)[stat.ST_MODE]
+        f, path = tempfile.mkstemp('slimer_binary')
+        os.close(f)
+        ret, out = run("lipo -thin %s %s -output %s" % (MACHINE_ARCH, k, path))
+        if not ret:
+            os.rename(path, k)
+            os.chmod(path, mode)
+            
+if __name__ == "__main__":
+    usage = "Usage: %prog [options] [args]\nMakes Universal binaries thinner..."
+    parser = optparse.OptionParser(usage=usage)
+    parser.add_option("-A", "--all_apps", action="store_true",
+                      help="Walk through all Applications indexed by Spotlight")
+    parser.add_option("-R", "--report_only", action="store_true",
+                      help="Only print the report, don't modify the binaries.")
+    (options, args) = parser.parse_args()
+    if options.all_apps:
+        all = {}
+        for i in get_all_applications_dirs():
+            all.update(walk_directory(i))
+            report(all)
+            if not options.report_only:
+                thin(all)
+    elif len(args):
+        all = {}
+        for a in args:
+            if os.path.isdir(a):
+                all.update(walk_directory(a))
+            else:
+                info = check_universal_file(a)
+                if info:
+                    all.update(info)
+        report(all)
+        if not options.report_only:
+            thin(all)

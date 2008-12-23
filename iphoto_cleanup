@@ -1,0 +1,31 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import shutil
+
+INFO = """
+WARNING:
+Now you'll need to launch iPhoto, select all your Events
+and run 'Revert to Originals' from the Photos menu.
+"""
+
+HOME = os.getenv("HOME")
+PICTURES = os.path.join(HOME, "Pictures")
+IPHOTO_LIBRARY = os.path.join(PICTURES, "iPhoto Library")
+MODIFIED_DIR = os.path.join(IPHOTO_LIBRARY, "Modified")
+ORIGINALS_DIR = os.path.join(IPHOTO_LIBRARY, "Originals")
+
+def main():
+    for root, dirs, files in os.walk(MODIFIED_DIR):
+        for f in files:
+            modified_file = os.path.join(root, f)
+            original_file = os.path.join(root.replace(MODIFIED_DIR, ORIGINALS_DIR), f)
+            if os.path.exists(original_file):
+                print "Moving to " + original_file
+                shutil.move(modified_file, original_file)
+
+    print "\n"
+
+if __name__ == "__main__":
+    main()
