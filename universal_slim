@@ -106,3 +106,5 @@ if __name__ == "__main__":
         report(all)
         if not options.report_only:
             thin(all)
+    else:
+        parser.print_help()
