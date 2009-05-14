@@ -7,12 +7,12 @@
 # also "ln -s `which e` `dirname `which e``/ei"
 #
 
-EMACSC_OPTIONS=$*
+OPTIONS=$*
 if [ `basename $0` == "ei" ]
 then
-    EMACSC_OPTIONS="-t ${EMACS_OPTIONS}"
+    OPTIONS="-t ${OPTIONS}"
 else
-    EMACSC_OPTIONS="-c ${EMACS_OPTIONS}"
+    OPTIONS="-c ${OPTIONS}"
 fi
 
 function emacsd () {
@@ -21,7 +21,7 @@ function emacsd () {
 }
 
 function emacsc () {
-    `which emacsclient` ${EMACSC_OPTIONS}
+    `which emacsclient` ${OPTIONS}
     if [ $? != 0 ]
     then
         emacsd;
