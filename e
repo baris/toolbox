@@ -8,25 +8,35 @@
 #
 
 OPTIONS=$*
-if [ `basename $0` == "ei" ]
+
+# Text or Not?
+test `basename $0` == "ei"
+GRAPHIC_MODE=$?
+
+# Use daemon?
+# set E_DAEMON env variable to run emacs daemon.
+if [ -n "$E_DAEMON+x" ]
 then
-    OPTIONS="-t ${OPTIONS}"
+    if [ $GRAPHIC_MODE == 0 ]
+    then
+        OPTIONS="-nw ${OPTIONS}"
+    fi
+    `which emacs` --no-site-file ${OPTIONS}
 else
-    OPTIONS="-c ${OPTIONS}"
-fi
-
-function emacsd () {
-    echo "emacsd!"
-    `which emacs` --no-site-file --daemon
-}
-
-function emacsc () {
+    # Text or Not?
+    if [ $GRAPHIC_MODE == 0 ]
+    then
+        OPTIONS="-t ${OPTIONS}"
+    else
+        OPTIONS="-c ${OPTIONS}"
+    fi
     `which emacsclient` ${OPTIONS}
     if [ $? != 0 ]
     then
-        emacsd;
-        emacsc;
+        `which emacs` --no-site-file --daemon
+        `which emacsclient` ${OPTIONS}
     fi
-}
 
-emacsc
+fi
+
+
