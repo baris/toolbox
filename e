@@ -21,7 +21,7 @@ then
     then
         OPTIONS="-nw ${OPTIONS}"
     fi
-    `which emacs` --no-site-file ${OPTIONS}
+    `which emacs` --no-site-file --geometry 110x55 ${OPTIONS}
 else
     # Text or Not?
     if [ $GRAPHIC_MODE == 0 ]
