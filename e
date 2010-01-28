@@ -7,6 +7,8 @@
 # also "ln -s `which e` `dirname `which e``/ei"
 #
 
+EMACS=`which emacs`
+
 OPTIONS=$*
 
 # Text or Not?
@@ -21,7 +23,7 @@ then
     then
         OPTIONS="-nw ${OPTIONS}"
     fi
-    `which emacs` --no-site-file --geometry 110x55 ${OPTIONS}
+    ${EMACS} --no-site-file --geometry 110x55 ${OPTIONS}
 else
     # Text or Not?
     if [ $GRAPHIC_MODE == 0 ]
@@ -33,7 +35,7 @@ else
     `which emacsclient` ${OPTIONS}
     if [ $? != 0 ]
     then
-        `which emacs` --no-site-file --daemon
+        ${EMACS} --no-site-file --daemon
         `which emacsclient` ${OPTIONS}
     fi
 
