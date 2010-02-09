@@ -20,15 +20,56 @@ IPHOTO_LIBRARY = os.path.join(PICTURES, "iPhoto Library")
 MODIFIED_DIR = os.path.join(IPHOTO_LIBRARY, "Modified")
 ORIGINALS_DIR = os.path.join(IPHOTO_LIBRARY, "Originals")
 
+def find_original_file(root, f):
+    o_f = os.path.join(root.replace(MODIFIED_DIR, ORIGINALS_DIR), f)
+    if os.path.exists(o_f):
+        return o_f
+    # try harder to find the original. maybe it doesn't have the same
+    # extension (possible with RAW files). or maybe they don't have
+    # the same base directory.
+    fname, ext = os.path.splitext(os.path.basename(f))
+    o_dir = os.path.dirname(o_f)
+
+    # check for a base directory
+    if not os.path.exists(o_dir):
+        o_parent = os.path.dirname(o_dir)
+        o_dir_base = os.path.basename(o_dir)
+        if not os.path.exists(o_parent):
+            print " * Can not find the Originals directory * :", o_parent
+            return None
+        o_parent_dirs = os.listdir(o_parent)
+        for d in o_parent_dirs:
+            if o_dir_base.startswith(d) and o_dir_base[len(d):].startswith("_"):
+                o_dir = os.path.join(o_parent, d)
+                break
+        else:
+            return None
+        
+        o_f = os.path.join(o_dir, f)
+        if os.path.exists(o_f):
+            return o_f
+
+    # check of a different extension
+    o_files = os.listdir(o_dir)
+    for o in o_files:
+        if o.startswith(fname) and o[len(fname):].startswith(os.path.extsep):
+            print " * Original file has a different extension! * :", o
+            return os.path.join(o_dir, o)
+    
+    return None
+
 def main():
     for root, dirs, files in os.walk(MODIFIED_DIR):
         for f in files:
             modified_file = os.path.join(root, f)
-            original_file = os.path.join(root.replace(MODIFIED_DIR, ORIGINALS_DIR), f)
-            if os.path.exists(original_file):
+            print "Trying for :", modified_file
+            original_file = find_original_file(root, f)
+            if original_file:
                 print "Moving to " + original_file
                 shutil.move(modified_file, original_file)
-
+            else:
+                print " * Original file not found! * :", f
+            print
     print "\n"
 
 if __name__ == "__main__":
