@@ -1,44 +1,10 @@
 #!/bin/bash
-#
-# also add these to .bashrc
-# export EDITOR=e
-# export VISUAL=e
-#
-# also "ln -s `which e` `dirname `which e``/ei"
-#
 
-EMACS=`which emacs`
+OSXVERSION=`sysctl -n kern.osrelease 2> /dev/null`
 
-OPTIONS=$*
-
-# Text or Not?
-test `basename $0` == "ei"
-GRAPHIC_MODE=$?
-
-# Use daemon?
-# set E_DAEMON env variable to run emacs daemon.
-if [ -n "$E_DAEMON+x" ]
-then
-    if [ $GRAPHIC_MODE == 0 ]
-    then
-        OPTIONS="-nw ${OPTIONS}"
-    fi
-    ${EMACS} --no-site-file --geometry 110x55 ${OPTIONS}
-else
-    # Text or Not?
-    if [ $GRAPHIC_MODE == 0 ]
-    then
-        OPTIONS="-t ${OPTIONS}"
-    else
-        OPTIONS="-c ${OPTIONS}"
-    fi
-    `which emacsclient` ${OPTIONS}
-    if [ $? != 0 ]
-    then
-        ${EMACS} --no-site-file --daemon
-        `which emacsclient` ${OPTIONS}
-    fi
-
+if [ $? -eq 0 ]; then
+    open -a Emacs $*
+else 
+    emacs --no-site-file $*
 fi
-
 

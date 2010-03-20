@@ -130,5 +130,8 @@ if __name__ == "__main__":
         do_all_apps(options, args)
     elif len(args):
         do_list(options, args)
+    elif options.report_only:
+        print "Walking through all Applications..."
+        do_all_apps(options, args)
     else:
         parser.print_help()
