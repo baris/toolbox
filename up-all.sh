@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Update all local svn/git copies
+
 BASEDIR=`pwd`
 
 function run_verbose {
