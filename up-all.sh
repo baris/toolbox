@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 BASEDIR=`pwd`
 
 function run_verbose {
