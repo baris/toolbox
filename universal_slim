@@ -38,18 +38,20 @@ def get_size_info(binary):
             architectures[cur_arch] = int(line.split()[1])
     return architectures
 
-def check_universal_file(f):
+def check_universal_file(f, options):
     if not os.path.isfile(f):
         return None
     mode = os.stat(f)[0]
-    if mode & stat.S_IXOTH or mode & stat.S_IXGRP or mode & stat.S_IXUSR:
+    if options.force:
+        pass
+    elif mode & stat.S_IXOTH or mode & stat.S_IXGRP or mode & stat.S_IXUSR:
         pass
     elif f.endswith(".dynlib"):
         pass
     else:
         return None
 
-    if run("file \"%s\"" % f)[1][0].find("Mach-O universal") >= 0:
+    if run("file \"%s\"" % f)[1][0].find("Mach-O") >= 0:
         try:
             archs = get_size_info(f)
             if len(archs) > 1:
@@ -58,11 +60,11 @@ def check_universal_file(f):
             pass
     return None
 
-def walk_directory(d):
+def walk_directory(d, options):
     all = {}
     for root,dirs,files in os.walk(d):
         for f in files:
-            info = check_universal_file(os.path.join(root,f))
+            info = check_universal_file(os.path.join(root,f), options)
             if info:
                 all.update(info)
     return all
@@ -95,7 +97,7 @@ def do_all_apps(options, args):
     all_saved = 0
     for i in get_all_applications_dirs():
         print i
-        new = walk_directory(i)
+        new = walk_directory(i, options)
         saved_space = report(new)
         if saved_space:
             all.update(new)
@@ -109,9 +111,9 @@ def do_list(options, args):
     all = {}
     for a in args:
         if os.path.isdir(a):
-            all.update(walk_directory(a))
+            all.update(walk_directory(a, options))
         else:
-            info = check_universal_file(a)
+            info = check_universal_file(a, options)
             if info:
                 all.update(info)
     report(all)
@@ -125,6 +127,8 @@ if __name__ == "__main__":
                       help="Walk through all Applications indexed by Spotlight")
     parser.add_option("-R", "--report_only", action="store_true",
                       help="Only print the report, don't modify the binaries.")
+    parser.add_option("-F", "--force", action="store_true",
+                      help="Force to run check on all files (not only on binaries & dynlibs)")
     (options, args) = parser.parse_args()
     if options.all_apps:
         do_all_apps(options, args)
