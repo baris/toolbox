@@ -1,0 +1,25 @@
+#!/usr/bin/python
+
+import sys
+import random
+from optparse import OptionParser
+
+def shuf(fpath):
+    try:
+        lines = open(fpath, 'r').readlines()
+        random.shuffle(lines)
+        return "".join(lines)
+    except IOError:
+        return ""
+
+def main():
+    parser = OptionParser()
+    parser.add_option("-o", "--output", default=None,
+                      help="write result to OUTPUT instead of standard output")
+    (options, args) = parser.parse_args()
+
+    output = open(options.output, "w") if options.output else sys.stdout
+    map(output.write, map(shuf, args)) 
+
+if __name__ == "__main__":
+    main()
