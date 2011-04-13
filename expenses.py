@@ -180,7 +180,7 @@ def get_chart_for_expense_categories(transactions):
     categories = group_by_category(expenses)
     for c,lst in categories.items():
         percentage = (sum_expenses(lst) / all_expenses) * 100
-        data.append((c, percentage))
+        data.append((c.replace(' ', '+'), percentage))
 
     data.sort(cmp=sort_by_percentage)
 
