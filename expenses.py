@@ -53,18 +53,27 @@ class Writer:
         self.out.write("%s\n" % x)
 
     def write_aligned(self, x, y):
+        r = "%.2f" % y
         self.out.write("%s : %s\n" % (str(x).rjust(20),
-                                      str(y).rjust(10)))
+                                      r.rjust(10)))
 
     def write_sum(self, name, transactions):
         self.write_aligned(name, sum(transactions))
 
     def write_categories(self, transactions):
-        for category,lst in group_by_category(get_expenses(transactions)).items():
-            self.write_sum(category, lst)
+        def sorted(group):
+            def sort(x,y):
+                if x[1] >= y[1]: return 1
+                else: return -1
+            sums = [(category, sum(lst)) for category,lst in group.items()]
+            sums.sort(cmp=sort)
+            return sums
+
+        for category,total in sorted(group_by_category(get_expenses(transactions))):
+            self.write_aligned(category, total)
             
-        for category,lst in group_by_category(get_incomes(transactions)).items():
-            self.write_sum(category, lst)
+        for category,total in sorted(group_by_category(get_incomes(transactions))):
+            self.write_aligned(category, total)
     
     def write_months(self, transactions, month_sep=""):
         _txs = group_by_month(transactions)
