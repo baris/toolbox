@@ -204,9 +204,10 @@ def get_chart_for_expense_categories(transactions):
 
 
 def get_chart_by_month(transactions):
-    base_chart = "https://chart.googleapis.com/chart?chxt=x&chs=600x350&cht=bvg&chtt=Monthly+Report&chbh=40&chco=A2C180,3D7930"
+    base_chart = "https://chart.googleapis.com/chart?chxt=x,y&chs=600x350&cht=bvg&chtt=Monthly+Report&chbh=40&chco=22FF22,FF2222&"
 
     data = []
+    maximum = 0
     all_expenses = sum_expenses(transactions)
     all_incomes = sum_incomes(transactions)
     _txs = group_by_month(transactions)
@@ -214,6 +215,7 @@ def get_chart_by_month(transactions):
     dates.sort()
     for date in dates:
         lst = _txs[date]
+        maximum = max(sum_expenses(lst), sum_incomes(lst), maximum)
         per_expenses = (sum_expenses(lst) / all_expenses) * 100
         per_incomes = (sum_incomes(lst) / all_incomes) * 100
         data.append((date, per_expenses, per_incomes))
@@ -224,11 +226,15 @@ def get_chart_by_month(transactions):
         chd_expense.append(str(abs(d[1])))
         chd_income.append(str(d[2]))
 
-    chart = "%s&chxl=0:|%s&chd=t:%s|%s" % (base_chart, "|".join(chxl),
-                                          ",".join(chd_income),
-                                          ",".join(chd_expense))
+    print maximum
+    chart = "%s&chxl=0:|%s&chd=t:%s|%s&chxr=1,0,%d" % (base_chart,
+                                                       "|".join(chxl),
+                                                       ",".join(chd_income),
+                                                       ",".join(chd_expense),
+                                                       maximum)
     return chart
 
+#    chart = "%s&chxl=0:|%s&chd=t:%s|%s" % (base_chart, "|".join(chxl),
 
 
 if __name__ == "__main__":
