@@ -16,8 +16,8 @@ do
     if [ -f "${i}/.git/refs/remotes/git-svn" ]; then
         run_verbose "git svn rebase" ${i}
     elif [ -d "${i}/.git/refs/remotes/origin" ]; then
-        run_verbose "git fetch origin" ${i}
-        run_verbose "git merge origin/master" ${i}
+        run_verbose "git checkout master" ${i}
+        run_verbose "git pull" ${i}
     elif [ -d "${i}/.svn/" ]; then
         run_verbose "svn up" ${i}
     fi
