@@ -24,7 +24,7 @@ class Date(datetime):
                 "June","July","August","September",
                 "October","November","December"][self.month-1]
 
-    def sameday(self):
+    def dayone(self):
         "Return a new date only with month and year ignoring the rest"
         return Date(year=self.year, month=self.month, day=1)
 
@@ -150,7 +150,7 @@ def group_by_category(transactions):
     return group(transactions, lambda tx: tx.category)
 
 def group_by_month(transactions):
-    return group(transactions, lambda tx: tx.date.sameday())
+    return group(transactions, lambda tx: tx.date.dayone())
 
 def sum_incomes(transactions):
     return sum(get_incomes(transactions))
@@ -160,8 +160,10 @@ def sum_expenses(transactions):
 
 
 ##### Google Charts helpers #####
+charts = "https://chart.googleapis.com/chart"
+
 def get_chart_for_expense_categories(transactions):
-    base_chart = "https://chart.googleapis.com/chart?cht=p&chs=600x350&chtt=Expenses+by+category"
+    base_chart = "%s?cht=p&chs=600x350&chtt=Expenses+by+category" % charts
 
     def iter_color(color):
         def get_hex(i):
@@ -204,7 +206,7 @@ def get_chart_for_expense_categories(transactions):
 
 
 def get_chart_by_month(transactions):
-    base_chart = "https://chart.googleapis.com/chart?chxt=x,y&chs=600x350&cht=bvg&chtt=Monthly+Report&chbh=40&chco=22FF22,FF2222&"
+    base_chart = "%s?chxt=x,y&chs=600x350&cht=bvg&chtt=Monthly+Report&chbh=40&chco=22FF22,FF2222&" % charts
 
     data = []
     maximum = 0
