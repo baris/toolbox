@@ -53,6 +53,9 @@ do
             run "git checkout $CUR_BRANCH" ${i}
             run "git pull" ${i}
         fi
+    elif [ -d "${i}/.hg/" ]; then
+        run "hg pull" ${i}
+        run "hg up" ${i}
     elif [ -d "${i}/.svn/" ]; then
         run "svn up" ${i}
     fi
