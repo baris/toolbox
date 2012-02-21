@@ -21,9 +21,9 @@ def read_sample_content(path, size):
         fd = os.open(path, os.O_RDONLY)
         read_size = MB / 2
         sample_content += os.read(fd, read_size)
-        remaning_size = size - read_size
-        if remaning_size > read_size:
-            seek_length = size - read_size
+        remaining_size = size - read_size
+        if remaining_size > read_size:
+            seek_length = remaining_size - read_size
             os.lseek(fd, seek_length, os.SEEK_SET)
             sample_content += os.read(fd, read_size)
         os.close(fd)
