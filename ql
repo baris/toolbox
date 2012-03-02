@@ -1,2 +1,2 @@
 #!/bin/sh
-qlmanager -p %* >& /dev/null
+qlmanage -p $*
