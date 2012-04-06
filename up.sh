@@ -42,28 +42,46 @@ function git_branch () {
     echo $gitbranch
 }
 
-for i in `ls`
-do 
-    echo "#### Working on ${i} ####"
-    if [ -f "${i}/.git/refs/remotes/git-svn" ]; then
-        run "git svn rebase" ${i}
-    elif [ -d "${i}/.git/refs/remotes/origin" ]; then
-        CUR_BRANCH=$(git_branch ${i})
+function update_directory() {
+    DIR=$1
+    IS_REPOSITORY=1
+    echo "#### Working on ${PWD}/${DIR} ####"
+    if [ -f "${DIR}/.git/refs/remotes/git-svn" ]; then
+        run "git svn rebase" ${DIR}
+    elif [ -d "${DIR}/.git/refs/remotes/origin" ]; then
+        CUR_BRANCH=$(git_branch ${DIR})
         if [[ x$CUR_BRANCH != "xmaster" ]]; then
             _msg "Changing current branch from ${CUR_BRANCH} to master"
-            run "git checkout master" ${i}
+            run "git checkout master" ${DIR}
         fi
-        run "git pull" ${i}
+        run "git pull" ${DIR}
         if [[ x$CUR_BRANCH != "xmaster" ]]; then
-            run "git checkout $CUR_BRANCH" ${i}
-            run "git pull" ${i}
+            run "git checkout $CUR_BRANCH" ${DIR}
+            run "git pull" ${DIR}
         fi
-    elif [ -d "${i}/.hg/" ]; then
-        run "hg pull" ${i}
-        run "hg up" ${i}
-    elif [ -d "${i}/.svn/" ]; then
-        run "svn up" ${i}
+    elif [ -d "${DIR}/.hg/" ]; then
+        run "hg pull" ${DIR}
+        run "hg up" ${DIR}
+    elif [ -d "${DIR}/.svn/" ]; then
+        run "svn up" ${DIR}
+    else
+        IS_REPOSITORY=0
     fi
-done
+    return $IS_REPOSITORY
+}
+
+function update_directory_rec() {
+    update_directory $1
+    if [ $? -ne 1 ]; then
+        pushd $1 > /dev/null
+        update_directory_rec $(ls)
+        popd > /dev/null
+    else
+        shift 1
+        update_directory_rec $@
+    fi
+}
+
+update_directory_rec $(ls)
 
 rm -f $TMPLOG
