@@ -1,10 +1,11 @@
 #!/bin/bash
 
+TMPLOG=$(mktemp /tmp/up.XXXXXXXXXX)
+
 if [[ $1 == "-v" ]]; then
     VERBOSE=1
     shift
 fi
-
 
 function _msg {
     if [[ $VERBOSE -eq 1 ]]; then
@@ -16,7 +17,11 @@ function _run {
     if [[ $2 -eq 1 ]]; then
         $(eval $1)
     else
-        eval $1 > /dev/null 2>&1
+        :> $TMPLOG
+        eval $1 > $TMPLOG 2>&1
+        if [ $? -ne 0 ]; then
+            echo $(cat $TMPLOG)
+        fi
     fi
 }
 
@@ -60,3 +65,5 @@ do
         run "svn up" ${i}
     fi
 done
+
+rm -f $TMPLOG
