@@ -34,6 +34,10 @@ if $(networksetup -getairportnetwork en1|grep Verivue > /dev/null); then
     networksetup -setdnsservers Wi-Fi 192.168.3.150
     sudo route add -net 192.168.3 192.168.0.11
     sudo route add -net 192.168.2 192.168.0.11
+elif $(networksetup -getairportnetwork en1|grep PlanetLab > /dev/null); then
+    networksetup -setdnsservers Wi-Fi 10.0.1.1
+    sudo route delete -net 192.168.3 192.168.0.11
+    sudo route delete -net 192.168.2 192.168.0.11
 else
     networksetup -setdnsservers Wi-Fi 8.8.8.8
     sudo route delete -net 192.168.3 192.168.0.11
