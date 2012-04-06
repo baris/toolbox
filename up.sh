@@ -71,6 +71,9 @@ function update_directory() {
 }
 
 function update_directory_rec() {
+    if [ $# -eq 0 ]; then
+        return
+    fi
     update_directory $1
     if [ $? -ne 1 ]; then
         pushd $1 > /dev/null
