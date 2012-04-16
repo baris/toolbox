@@ -9,7 +9,7 @@ fi
 
 function _msg {
     if [[ $VERBOSE -eq 1 ]]; then
-        echo -e $1
+        echo -e $@
     fi
 }
 
@@ -74,15 +74,22 @@ function update_directory_rec() {
     if [ $# -eq 0 ]; then
         return
     fi
-    update_directory $1
-    if [ $? -ne 1 ]; then
-        pushd $1 > /dev/null
-        update_directory_rec $(ls)
-        popd > /dev/null
-    else
-        shift 1
-        update_directory_rec $@
+    local head=$1
+    shift 1
+    local tail=$@
+    _msg -------------------------------
+    _msg head=$head
+    _msg tail=$tail
+
+    if [ -d $head ]; then
+        update_directory $head
+        if [ $? -ne 1 ]; then
+            pushd $head > /dev/null
+            update_directory_rec $(ls)
+            popd > /dev/null
+        fi
     fi
+    update_directory_rec $tail
 }
 
 update_directory_rec $(ls)
