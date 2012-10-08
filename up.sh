@@ -92,6 +92,8 @@ function update_directory_rec() {
     update_directory_rec $tail
 }
 
-update_directory_rec $(ls)
+if update_directory '.'; then
+    update_directory_rec $(ls)
+fi
 
 rm -f $TMPLOG
