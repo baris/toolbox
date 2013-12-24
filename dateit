@@ -1,0 +1,48 @@
+#!/bin/bash
+
+o_dryrun=0
+o_force=0
+
+ARGS=$(getopt -o fn -l "force,dry-run" -- "$@")
+eval set -- "$ARGS";
+
+while true; do
+    case "$1" in
+        -f|--force)
+            o_force=1
+            shift
+            ;;
+        -n|--dry-run)
+            o_dryrun=1
+            shift
+            ;;
+        --)
+            shift
+            break
+            ;;
+    esac
+done
+
+
+date_patern=$(date "+%Y%m%d_%H%M%S")
+for arg in $@
+do
+    path=$(dirname $arg)
+    filename=$(basename $arg)
+    extension=".${filename##*.}"
+    filename_no_extension="${filename%.*}"
+
+    if [ "$filename_no_extension" == "$filename" ]; then # extension not found
+        extension=""
+    fi
+
+    newfile="${path}/${filename_no_extension}-${date_patern}${extension}"
+    if [ $o_force -eq 1 ]; then
+        newfile="${path}/${date_patern}${extension}"
+    fi
+    if [ $o_dryrun -eq 1 ]; then
+        echo mv $arg $newfile
+    else
+        mv $arg $newfile
+    fi
+done
